@@ -34,7 +34,7 @@ static int	finish_eating(t_moni *moni)
 	while (i < moni->num_of_philo)
 	{
 		pthread_mutex_lock(&moni->philos[i].eat);
-		if (moni->must_eat > 0 && moni->philos[i].times_eaten >= moni->must_eat)
+		if (moni->philos[i].times_eaten >= moni->must_eat)
 			ate++;
 		pthread_mutex_unlock(&moni->philos[i].eat);
 		i++;
@@ -58,7 +58,9 @@ void	*check_status(void *ptr)
 	sleep_for(1);
 	while (1)
 	{
-		if (find_finish(moni) || finish_eating(moni))
+		if (find_finish(moni))
+			break ;
+		if (moni->must_eat > 0 && finish_eating(moni))
 			break ;
 		sleep_for(1);
 	}
