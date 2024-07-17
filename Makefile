@@ -9,8 +9,8 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME): $(SRCS) $(LIBFT)
-	@cc $(CFLAGS) $^ -o $@ $(LIBFT)
+$(NAME): $(SRCS)
+	@cc $(CFLAGS) $^ -o $@ 
 	@echo " \n$(Yellow)"
 
 	@echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
