@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   check.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hlee-sun <hlee-sun@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/17 14:09:44 by hlee-sun          #+#    #+#             */
+/*   Updated: 2024/07/17 14:10:02 by hlee-sun         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 static int	find_finish(t_moni *moni)
@@ -13,8 +25,9 @@ static int	find_finish(t_moni *moni)
 			pthread_mutex_lock(&moni->finish);
 			moni->finish_flag = 1;
 			pthread_mutex_unlock(&moni->finish);
-			print_finish(moni);
-			free_forks(moni);
+			pthread_mutex_lock(&moni->print_mutex);
+			printf("%ld %d died\n", curr_time() - moni->start_time, i + 1);
+			pthread_mutex_unlock(&moni->print_mutex);
 			pthread_mutex_unlock(&moni->philos[i].eat);
 			return (1);
 		}
@@ -43,7 +56,6 @@ static int	finish_eating(t_moni *moni)
 	{
 		pthread_mutex_lock(&moni->finish);
 		moni->finish_flag = 1;
-		free_forks(moni);
 		pthread_mutex_unlock(&moni->finish);
 		return (1);
 	}
@@ -55,14 +67,26 @@ void	*check_status(void *ptr)
 	t_moni	*moni;
 
 	moni = (t_moni *)ptr;
-	sleep_for(1);
+	usleep(1000);
 	while (1)
 	{
 		if (find_finish(moni))
 			break ;
 		if (moni->must_eat > 0 && finish_eating(moni))
 			break ;
-		sleep_for(1);
+		usleep(1000);
 	}
 	return (ptr);
+}
+
+int	finished(t_moni *moni)
+{
+	int	ret;
+
+	ret = 0;
+	pthread_mutex_lock(&moni->finish);
+	if (moni->finish_flag)
+		ret = 1;
+	pthread_mutex_unlock(&moni->finish);
+	return (ret);
 }

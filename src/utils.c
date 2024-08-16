@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hlee-sun <hlee-sun@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/17 14:09:06 by hlee-sun          #+#    #+#             */
+/*   Updated: 2024/07/17 14:10:02 by hlee-sun         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 int	get_check_nb(char *str)
@@ -26,21 +38,6 @@ int	get_check_nb(char *str)
 	return (res);
 }
 
-void	clean_up(t_moni *moni)
-{
-	int	i;
-
-	i = 0;
-	while (i < moni->num_of_philo)
-	{
-		pthread_mutex_destroy(&moni->forks[i]);
-		i++;
-	}
-	pthread_mutex_destroy(&moni->print_mutex);
-	free(moni->philos);
-	free(moni->forks);
-}
-
 long	curr_time(void)
 {
 	struct timeval	tv;
@@ -58,14 +55,37 @@ void	sleep_for(long time)
 		usleep(500);
 }
 
-void	free_forks(t_moni *moni)
+void	release_forks(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->fork_first->mutex);
+	pthread_mutex_lock(&philo->fork_second->mutex);
+	philo->fork_first->state = 0;
+	philo->fork_second->state = 0;
+	pthread_mutex_unlock(&philo->fork_second->mutex);
+	pthread_mutex_unlock(&philo->fork_first->mutex);
+}
+
+void	clean_up(t_moni *moni)
 {
 	int	i;
 
-	i = 0;
-	while (i < moni->num_of_philo)
+	if (moni->forks)
 	{
-		pthread_mutex_unlock(&moni->forks[i]);
-		i++;
+		i = -1;
+		while (++i < moni->num_of_philo)
+			pthread_mutex_destroy(&moni->forks[i].mutex);
+		free(moni->forks);
+	}
+	if (moni->philos)
+	{
+		i = -1;
+		while (++i < moni->num_of_philo)
+			pthread_mutex_destroy(&moni->philos[i].eat);
+		free(moni->philos);
+	}
+	if (moni->mutex_init == 1)
+	{
+		pthread_mutex_destroy(&moni->print_mutex);
+		pthread_mutex_destroy(&moni->finish);
 	}
 }

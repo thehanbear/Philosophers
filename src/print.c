@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   print.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hlee-sun <hlee-sun@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/17 14:08:56 by hlee-sun          #+#    #+#             */
+/*   Updated: 2024/07/17 14:10:02 by hlee-sun         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 int	print_error(char *message)
@@ -17,12 +29,9 @@ void	print_status(t_philo *philo, char *status)
 	pthread_mutex_unlock(&philo->moni->print_mutex);
 }
 
-void	print_finish(t_moni *moni)
+void	malloc_error_exit(t_moni *moni)
 {
-	int	i;
-
-	i = 0;
-	pthread_mutex_lock(&moni->print_mutex);
-	printf("%ld %d died\n", curr_time() - moni->start_time, i + 1);
-	pthread_mutex_unlock(&moni->print_mutex);
+	clean_up(moni);
+	print_error("Error: malloc failure");
+	exit(1);
 }

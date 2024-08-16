@@ -1,17 +1,29 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: hlee-sun <hlee-sun@student.hive.fi>        +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/07/17 14:09:11 by hlee-sun          #+#    #+#              #
+#    Updated: 2024/07/17 15:33:21 by hlee-sun         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME = philo
 
 SRCS = src/routine.c src/main.c src/utils.c \
-		src/init.c src/check.c src/print.c
+		src/init.c src/check.c src/print.c src/forks.c
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -pthread
 
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME): $(SRCS)
-	@cc $(CFLAGS) $^ -o $@ 
-	@echo " \n$(Yellow)"
+$(NAME): $(OBJS)
+	@cc $(CFLAGS) $(OBJS) -o $@ 
+	@echo "\n$(Green)"
 
 	@echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	@echo "@@@@@@@@@@@@@@@@@@@@@@@'~~~     ~~~\`@@@@@@@@@@@@@@@@@@@@@@@@@"
@@ -33,8 +45,7 @@ $(NAME): $(SRCS)
 	@echo "@@@@@@@@@@@@@a__/___/      /__\ \ \     \___.a@@@@@@@@@@@@@@@"
 	@echo "@@@@@@@@@@@@@/  (___.'\_______)\_|_|        \@@@@@@@@@@@@@@@@"
 	@echo "@@@@@@@@@@@@|\________                       ~~~~~\@@@@@@@@@@"
-	@echo "\n$(Ending)"
-
+	@echo " "
 
 clean:
 	@rm -rf $(OBJS)
@@ -53,13 +64,11 @@ fclean: clean
 	@echo "                 J/^ ^ ^ \\  |    /00  |    _//|"
 	@echo "                 |^ ^ ^ ^ |W|   |/^^\\ |   /oo |"
 	@echo "   All clean      \\m___m__|_|    \\m_m_|   \\mm_|"
-	@echo "\n$(Ending)"
+	@echo " "
 
 re: fclean all
 
 .PHONY: all clean fclean re
 
-
-Green = \033[0;32m
-Yellow = \033[0;33m
-Ending = \033[0m
+Green = '\033[32m'
+Ending = '\033[0m'

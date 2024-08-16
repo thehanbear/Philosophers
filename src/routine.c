@@ -1,50 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   routine.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hlee-sun <hlee-sun@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/07/17 14:09:02 by hlee-sun          #+#    #+#             */
+/*   Updated: 2024/07/17 14:10:02 by hlee-sun         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
-
-int	finished(t_moni *moni)
-{
-	int	ret;
-
-	ret = 0;
-	pthread_mutex_lock(&moni->finish);
-	if (moni->finish_flag)
-		ret = 1;
-	pthread_mutex_unlock(&moni->finish);
-	return (ret);
-}
 
 static void	philo_eat(t_philo *philo)
 {
-	pthread_mutex_lock(philo->left_fork);
-	if (finished(philo->moni))
-	{
-		pthread_mutex_unlock(philo->left_fork);
+	if (philo->moni->num_of_philo % 2 == 0)
+		get_forks_together(philo);
+	else
+		get_forks_one_by_one(philo);
+	if (finished(philo->moni) == 1)
 		return ;
-	}
-	print_status(philo, "has taken a fork");
-	pthread_mutex_lock(philo->right_fork);
-	if (finished(philo->moni))
-	{
-		pthread_mutex_unlock(philo->left_fork);
-		pthread_mutex_unlock(philo->right_fork);
-		return ;
-	}
-	print_status(philo, "has taken a fork");
 	pthread_mutex_lock(&philo->eat);
 	print_status(philo, "is eating");
 	philo->last_eat = curr_time();
 	philo->times_eaten++;
 	pthread_mutex_unlock(&philo->eat);
 	sleep_for(philo->moni->time_to_eat);
-	pthread_mutex_unlock(philo->left_fork);
-	pthread_mutex_unlock(philo->right_fork);
-}
-
-static void	single_philo(t_philo *philo)
-{
-	sleep_for(philo->moni->time_to_die);
-	pthread_mutex_lock(&philo->moni->finish);
-	philo->moni->finish_flag = 1;
-	pthread_mutex_unlock(&philo->moni->finish);
+	release_forks(philo);
 }
 
 static void	*philo(void *ptr)
@@ -52,21 +34,16 @@ static void	*philo(void *ptr)
 	t_philo	*philo;
 
 	philo = (t_philo *)ptr;
-	if (philo->id % 2 == 0)
-		sleep_for(1);
-	while (!finished(philo->moni))
+	if (philo->id % 2 == 1)
+		sleep_for(5);
+	while (finished(philo->moni) == 0)
 	{
-		if (philo->moni->num_of_philo == 1)
-		{
-			single_philo(philo);
-			break ;
-		}
 		philo_eat(philo);
-		if (finished(philo->moni))
+		if (finished(philo->moni) == 1)
 			break ;
 		print_status(philo, "is sleeping");
 		sleep_for(philo->moni->time_to_sleep);
-		if (finished(philo->moni))
+		if (finished(philo->moni) == 1)
 			break ;
 		print_status(philo, "is thinking");
 	}
